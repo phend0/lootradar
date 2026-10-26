@@ -1,0 +1,6 @@
+{
+  "summary":  "Implementation plan for adding custom SVG Store Brand icons (Epic Games, Steam, GOG, Prime Gaming, itch.io) and OS/Device Platform icons (Windows, macOS, Linux, Steam Deck, Console/Mobile) across Game Cards, Hero Spotlight, Filter Bars, and the Game Detail Modal, rebuilding the Samsung S26 Ultra APK, and pushing to GitHub.",
+  "updatedAt":  "2026-10-26T21:20:49.502166035Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}
