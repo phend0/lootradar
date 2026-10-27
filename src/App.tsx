@@ -1071,7 +1071,7 @@ export default function App() {
                   {liveGiveaways.length} Games Live
                 </div>
                 <div className="text-xs text-slate-400">
-                  Direct verified links to Epic, Steam, GOG, itch.io
+                  Direct verified links to Epic, Amazon Luna, Steam, GOG, itch.io
                 </div>
               </div>
 

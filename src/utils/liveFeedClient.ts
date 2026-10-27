@@ -223,22 +223,41 @@ export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
             return false;
           }
           const plat = String(item.platforms || '').toLowerCase();
+          const titleLower = String(item.title || '').toLowerCase();
           return (
             plat.includes('epic games store') ||
             plat.includes('steam') ||
             plat.includes('gog') ||
             plat.includes('itch.io') ||
-            plat.includes('drm-free')
+            plat.includes('drm-free') ||
+            plat.includes('prime') ||
+            plat.includes('amazon') ||
+            plat.includes('luna') ||
+            titleLower.includes('prime gaming') ||
+            titleLower.includes('amazon')
           );
         })
         .slice(0, 14);
 
       for (const item of candidates) {
         const platStr = String(item.platforms || '').toLowerCase();
+        const titleLower = String(item.title || '').toLowerCase();
         let store: StoreId = 'steam';
         let storeName = 'Steam Store';
 
-        if (platStr.includes('epic games store') && !platStr.includes('steam')) {
+        if (
+          platStr.includes('prime') ||
+          platStr.includes('amazon') ||
+          platStr.includes('luna') ||
+          titleLower.includes('prime gaming') ||
+          titleLower.includes('amazon')
+        ) {
+          store = 'prime';
+          storeName = 'Amazon Games (Luna)';
+        } else if (
+          platStr.includes('epic games store') &&
+          !platStr.includes('steam')
+        ) {
           store = 'epic';
           storeName = 'Epic Games Store';
         } else if (platStr.includes('gog')) {
@@ -274,7 +293,7 @@ export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
         const status = hoursLeft <= 48 ? 'expiring' : 'active';
         const cleanTitle = String(item.title || '')
           .replace(
-            /\s*\((Steam|Epic Games|IndieGala|Indiegala|GOG|itch\.io)\)\s*/gi,
+            /\s*\((Steam|Epic Games|IndieGala|Indiegala|GOG|itch\.io|Prime Gaming|Amazon|Luna)\)\s*/gi,
             ' '
           )
           .replace(/\s*Giveaway$/i, '')
@@ -334,14 +353,14 @@ export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
     // Ignore
   }
 
-  const gogFallback = INITIAL_GIVEAWAYS.filter(
+  const lunaAndGogCatalog = INITIAL_GIVEAWAYS.filter(
     (g) =>
-      g.store === 'gog' &&
+      (g.store === 'prime' || g.store === 'gog') &&
       new Date(g.endDate).getTime() > now &&
       isEligibleGiveawayGame(g)
   );
 
-  const combined = [...epicGames, ...gpGames, ...gogFallback].filter(
+  const combined = [...epicGames, ...lunaAndGogCatalog, ...gpGames].filter(
     (g) => new Date(g.endDate).getTime() > now && isEligibleGiveawayGame(g)
   );
 

@@ -23,9 +23,9 @@ export const STORE_META: Record<
     colorClass: 'text-purple-400',
   },
   prime: {
-    name: 'Prime Gaming',
-    shortName: 'Prime Gaming',
-    domain: 'gaming.amazon.com',
+    name: 'Amazon Games (Luna)',
+    shortName: 'Amazon Luna',
+    domain: 'luna.amazon.com',
     colorClass: 'text-teal-400',
   },
   itch: {
@@ -539,4 +539,239 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       storage: '4 GB available space',
     },
   },
+
+  // 14. LIVE AMAZON GAMES (LUNA) FREE PC GAME #1 (EXPIRING < 48H)
+  {
+    id: 'luna-amzn1-351cbaa9-ac70-4e47-93b6-1a4cb7dd38c8',
+    title: 'High on Life',
+    subtitle: 'Full Paid Game — 100% Off on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows', 'steamdeck'],
+    originalPrice: 39.99,
+    status: 'expiring',
+    startDate: '2026-09-24T17:00:00.000Z',
+    endDate: '2026-10-28T17:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/71INHIzOrjL._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Sci-Fi Comedy FPS', 'Epic Redemption'],
+    publisher: 'Squanch Games',
+    developer: 'Squanch Games',
+    releaseYear: 2022,
+    ratingScore: 91,
+    drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
+    claimUrl:
+      'https://luna.amazon.com/claims/high-on-life-epic/dp/amzn1.pg.item.351cbaa9-ac70-4e47-93b6-1a4cb7dd38c8?ref_=SM_HighonLife_S01_FGWP_CRWN',
+    description:
+      'Humanity is being threatened by an alien cartel who wants to use them as drugs. Partner with charismatic talking guns, collect intergalactic bounties, and take down Garmantuous and his gang.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/high-on-life-epic/dp/amzn1.pg.item.351cbaa9-ac70-4e47-93b6-1a4cb7dd38c8',
+      'Official Retail Value: $39.99 USD — Free with Amazon Prime on luna.amazon.com',
+      'Redeems full permanent game to your Epic Games Store account',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-4430K or AMD Ryzen 5 1600',
+      memory: '8 GB RAM',
+      graphics: 'NVIDIA GTX 1060 (6 GB) or Radeon RX 580',
+      storage: '45 GB available space',
+    },
+  },
+
+  // 15. LIVE AMAZON GAMES (LUNA) FREE PC GAME #2
+  {
+    id: 'luna-amzn1-69de011b-6575-41ab-9964-971e59cf7457',
+    title: 'Ad Infinitum',
+    subtitle: 'Full Paid Game — 100% Off on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows', 'steamdeck'],
+    originalPrice: 34.99,
+    status: 'active',
+    startDate: '2026-10-22T17:00:00.000Z',
+    endDate: '2026-11-25T18:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/61oHRL5seYL._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Psychological Horror', 'Epic Redemption'],
+    publisher: 'Nacon',
+    developer: 'Hekate',
+    releaseYear: 2023,
+    ratingScore: 87,
+    drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
+    claimUrl:
+      'https://luna.amazon.com/claims/ad-infinitum-epic/dp/amzn1.pg.item.69de011b-6575-41ab-9964-971e59cf7457?ref_=SM_AdInfinitum_S01_FGWP_CRWN',
+    description:
+      'Trapped between two realities, you wander tormented within the walls of your family manor and the trenches of World War I in this atmospheric first-person psychological horror adventure.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/ad-infinitum-epic/dp/amzn1.pg.item.69de011b-6575-41ab-9964-971e59cf7457',
+      'Official Retail Value: $34.99 USD — 100% Free on luna.amazon.com until November 25',
+      'Permanent full-game license redeemed via Epic Games Store',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-8400 or AMD Ryzen 5 1600X',
+      memory: '12 GB RAM',
+      graphics: 'NVIDIA GTX 1060 or AMD Radeon RX 580',
+      storage: '20 GB available space',
+    },
+  },
+
+  // 16. LIVE AMAZON GAMES (LUNA) FREE PC GAME #3
+  {
+    id: 'luna-amzn1-98d2b591-efd2-420f-928c-e7a9b409f67a',
+    title: 'Caravan SandWitch',
+    subtitle: 'Full Paid Game — 100% Off on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows', 'steamdeck'],
+    originalPrice: 24.99,
+    status: 'active',
+    startDate: '2026-10-15T17:00:00.000Z',
+    endDate: '2026-12-16T18:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/61uVCnb+LJL._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Sci-Fi Exploration', 'Amazon Games App'],
+    publisher: 'Dear Villagers',
+    developer: 'Studio Plane Toast',
+    releaseYear: 2024,
+    ratingScore: 92,
+    drmType: 'Amazon Games App / Luna Direct Claim (Keep Forever)',
+    claimUrl:
+      'https://luna.amazon.com/claims/caravan-sandwitch-aga/dp/amzn1.pg.item.98d2b591-efd2-420f-928c-e7a9b409f67a?ref_=SM_CaravanSandWitch_S01_FGWP_CRWN',
+    description:
+      'Embark on a hopeful journey across a Sci-Fi Provence-like world in your customizable van. Upgrade your vehicle, help local communities, and search for your missing sister.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/caravan-sandwitch-aga/dp/amzn1.pg.item.98d2b591-efd2-420f-928c-e7a9b409f67a',
+      'Official Retail Value: $24.99 USD — 100% Free on luna.amazon.com until December 16',
+      'Yours to keep forever in the Amazon Games library',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-6600K or AMD Ryzen 5 1600',
+      memory: '8 GB RAM',
+      graphics: 'NVIDIA GTX 1060 or Radeon RX 580',
+      storage: '8 GB available space',
+    },
+  },
+
+  // 17. LIVE AMAZON GAMES (LUNA) FREE PC GAME #4
+  {
+    id: 'luna-amzn1-7885fee3-7dda-40c5-8642-596bb1f4a9b3',
+    title: 'Vampire: The Masquerade - Swansong',
+    subtitle: 'Full Paid Game — 100% Off on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows'],
+    originalPrice: 49.99,
+    status: 'active',
+    startDate: '2026-10-15T17:00:00.000Z',
+    endDate: '2026-11-18T18:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/51ROEzV9RpL._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Narrative RPG', 'Epic Redemption'],
+    publisher: 'Nacon',
+    developer: 'Big Bad Wolf',
+    releaseYear: 2022,
+    ratingScore: 84,
+    drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
+    claimUrl:
+      'https://luna.amazon.com/claims/vampire-the-masquerade-swansong-epic/dp/amzn1.pg.item.7885fee3-7dda-40c5-8642-596bb1f4a9b3?ref_=SM_VampireTheMasqueradeSwansong_S01_FGWP_CRWN',
+    description:
+      'Play as 3 vampires from different clans in Boston, wield their supernatural disciplines wisely, and unravel a conspiracy threatening the Camarilla in this narrative RPG.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/vampire-the-masquerade-swansong-epic/dp/amzn1.pg.item.7885fee3-7dda-40c5-8642-596bb1f4a9b3',
+      'Official Retail Value: $49.99 USD — 100% Free on luna.amazon.com until November 18',
+      'Permanent full-game license redeemed via Epic Games Store',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-2300 or AMD FX-4350',
+      memory: '6 GB RAM',
+      graphics: 'NVIDIA GTX 770 or Radeon R9 280',
+      storage: '25 GB available space',
+    },
+  },
+
+  // 18. LIVE AMAZON GAMES (LUNA) FREE PC GAME #5
+  {
+    id: 'luna-amzn1-9d2ad65c-0963-4e2d-93e6-75ad2a4bfc87',
+    title: "Five Nights at Freddy's: Into the Pit",
+    subtitle: 'Full Paid Game — 100% Off on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows', 'steamdeck'],
+    originalPrice: 19.99,
+    status: 'active',
+    startDate: '2026-10-01T17:00:00.000Z',
+    endDate: '2026-11-04T18:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/512d8D3cCVL._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Survival Horror', 'Epic Redemption'],
+    publisher: 'Mega Cat Studios',
+    developer: 'Mega Cat Studios',
+    releaseYear: 2024,
+    ratingScore: 95,
+    drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
+    claimUrl:
+      'https://luna.amazon.com/claims/five-nights-at-freddys-into-the-pit-epic/dp/amzn1.pg.item.9d2ad65c-0963-4e2d-93e6-75ad2a4bfc87?ref_=SM_FiveNightsatFreddysIntothePit_S01_FGWP_CRWN',
+    description:
+      'Survive five nights of terror in this chilling pixel-art adventure game. Travel between time periods via a mysterious ball pit, solve puzzles, and outrun relentless animatronic threats.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/five-nights-at-freddys-into-the-pit-epic/dp/amzn1.pg.item.9d2ad65c-0963-4e2d-93e6-75ad2a4bfc87',
+      'Official Retail Value: $19.99 USD — 100% Free on luna.amazon.com until November 4',
+      'Permanent full-game license redeemed via Epic Games Store',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-750 or equivalent',
+      memory: '8 GB RAM',
+      graphics: 'NVIDIA GeForce GTX 670 or Radeon R9 270X',
+      storage: '3 GB available space',
+    },
+  },
+
+  // 19. LIVE AMAZON GAMES (LUNA) FREE PC GAME #6
+  {
+    id: 'luna-amzn1-b095156c-1207-49f0-801a-75ac03b74def',
+    title: 'DOOM (2016)',
+    subtitle: 'Full Paid Game — 100% Off GOG Code on Amazon Games (Luna)',
+    store: 'prime',
+    storeName: 'Amazon Games (Luna)',
+    platforms: ['windows', 'steamdeck'],
+    originalPrice: 19.99,
+    status: 'active',
+    startDate: '2026-10-01T17:00:00.000Z',
+    endDate: '2026-11-04T18:00:00.000Z',
+    coverImage:
+      'https://m.media-amazon.com/images/I/719F0+ORfML._FMwebp_.jpg',
+    accentGradient: 'from-teal-950/90 via-slate-900/90 to-slate-950',
+    genres: ['Full Game', 'Fast-Paced Arena FPS', 'DRM-Free GOG Key'],
+    publisher: 'Bethesda Softworks',
+    developer: 'id Software',
+    releaseYear: 2016,
+    ratingScore: 96,
+    drmType: 'Amazon Luna Claim → 100% DRM-Free GOG.com Code',
+    claimUrl:
+      'https://luna.amazon.com/claims/doom-gog/dp/amzn1.pg.item.b095156c-1207-49f0-801a-75ac03b74def?ref_=SM_DOOM_S01_FGWP_CRWN',
+    description:
+      'DOOM returns as a brutally fun and challenging modern-day shooter experience. Relentless demons, impossibly destructive guns, and fast, fluid movement provide the foundation for intense first-person combat.',
+    highlights: [
+      'Direct Amazon Luna claim page: https://luna.amazon.com/claims/doom-gog/dp/amzn1.pg.item.b095156c-1207-49f0-801a-75ac03b74def',
+      'Official Retail Value: $19.99 USD — Free DRM-Free GOG Code on luna.amazon.com',
+      'Yours to keep forever on GOG.com',
+    ],
+    systemRequirements: {
+      os: 'Windows 10 / 11 (64-bit)',
+      processor: 'Intel Core i5-2400 or AMD FX-8320',
+      memory: '8 GB RAM',
+      graphics: 'NVIDIA GTX 670 (2 GB) or AMD Radeon HD 7870',
+      storage: '55 GB available space',
+    },
+  },
 ];
+
