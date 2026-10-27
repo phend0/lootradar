@@ -53,7 +53,13 @@ export default defineConfig(() => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          navigateFallbackDenylist: [/^\/LootRadar-S26Ultra\.apk$/, /^\/api\//],
+          navigateFallbackDenylist: [
+            /^\/LootRadar\.apk$/,
+            /^\/LootRadar-S26Ultra\.apk$/,
+            /^\/LootRadar-iOS\.mobileconfig$/,
+            /^\/LootRadar-iOS\.ipa$/,
+            /^\/api\//,
+          ],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

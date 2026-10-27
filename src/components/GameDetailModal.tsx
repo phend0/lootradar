@@ -154,12 +154,19 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
                 href={game.claimUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  if (!isClaimed && game.status !== 'upcoming') {
+                    onToggleClaimed(game.id);
+                  }
+                }}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-xs transition-colors whitespace-nowrap shrink-0"
               >
                 <StoreIcon store={game.store} className="w-3.5 h-3.5" />
                 <span>
                   {game.status === 'upcoming'
                     ? `View on ${storeMeta.shortName}`
+                    : isClaimed
+                    ? `Claimed on ${storeMeta.shortName}`
                     : `Claim on ${storeMeta.shortName}`}
                 </span>
                 <ExternalLink className="w-3.5 h-3.5" />

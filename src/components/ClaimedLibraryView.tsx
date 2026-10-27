@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Check,
+  Cloud,
+  Download,
   ExternalLink,
   RotateCcw,
   Search,
   Trophy,
-  Download,
 } from 'lucide-react';
 import { GiveawayGame, PlatformId, StoreId } from '../types';
 import { PLATFORM_META, STORE_META } from '../data/giveaways';
@@ -15,13 +16,17 @@ import {
   PlatformIconList,
   StoreIcon,
 } from './PlatformIcons';
+import { CloudClaimRecord, User, sanitizeDocId } from '../firebase';
 
 interface ClaimedLibraryViewProps {
   giveaways: GiveawayGame[];
   claimedIds: string[];
+  cloudClaims?: CloudClaimRecord[];
+  currentUser?: User | null;
   onToggleClaimed: (gameId: string) => void;
   onSelectGame: (game: GiveawayGame) => void;
   onExploreRadar: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 const ALL_STORES: StoreId[] = ['epic', 'steam', 'gog', 'prime', 'itch'];
@@ -29,15 +34,76 @@ const ALL_STORES: StoreId[] = ['epic', 'steam', 'gog', 'prime', 'itch'];
 export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
   giveaways,
   claimedIds,
+  cloudClaims = [],
+  currentUser = null,
   onToggleClaimed,
   onSelectGame,
   onExploreRadar,
+  onOpenAuthModal,
 }) => {
   const [selectedStore, setSelectedStore] = useState<StoreId | 'all'>('all');
-  const [selectedPlatform, setSelectedPlatform] = useState<PlatformId | 'all'>('all');
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformId | 'all'>(
+    'all'
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
-  const claimedGames = giveaways.filter((g) => claimedIds.includes(g.id));
+  // Merge active giveaways that are claimed + any historical cloud claims no longer in active feed
+  const claimedGames = useMemo(() => {
+    const result: GiveawayGame[] = [];
+    const seenSanitized = new Set<string>();
+
+    for (const g of giveaways) {
+      const sId = sanitizeDocId(g.id);
+      if (claimedIds.includes(g.id) || claimedIds.includes(sId)) {
+        result.push(g);
+        seenSanitized.add(sId);
+      }
+    }
+
+    for (const c of cloudClaims) {
+      const sId = sanitizeDocId(c.gameId);
+      if (!seenSanitized.has(sId)) {
+        seenSanitized.add(sId);
+        result.push({
+          id: c.gameId,
+          title: c.title,
+          subtitle: `Claimed on ${c.storeName}`,
+          store: c.store,
+          storeName: c.storeName,
+          platforms: ['windows'],
+          originalPrice: c.originalPrice,
+          status: 'active',
+          startDate: c.claimedAt,
+          endDate: c.claimedAt,
+          coverImage: c.coverImage,
+          accentGradient: 'from-cyan-950/90 via-slate-900/90 to-slate-950',
+          genres: ['Claimed Freebie', c.storeName],
+          publisher: c.storeName,
+          developer: c.storeName,
+          releaseYear: 2025,
+          ratingScore: 90,
+          drmType: `${c.storeName} Permanent Library`,
+          claimUrl: c.claimUrl,
+          description: `Claimed and saved to your LootRadar Cloud Account on ${new Date(
+            c.claimedAt
+          ).toLocaleDateString()}.`,
+          highlights: [
+            `Store Page: ${c.claimUrl}`,
+            `Retail Value Saved: $${c.originalPrice.toFixed(2)} USD`,
+          ],
+          systemRequirements: {
+            os: 'Windows 10 / 11 (64-bit)',
+            processor: 'Dual-Core 2.4 GHz or higher',
+            memory: '8 GB RAM',
+            graphics: 'DirectX 11 / 12 compatible GPU',
+            storage: '10 GB available space',
+          },
+        });
+      }
+    }
+
+    return result;
+  }, [giveaways, claimedIds, cloudClaims]);
 
   const filteredClaimed = claimedGames.filter((g) => {
     if (selectedStore !== 'all' && g.store !== selectedStore) return false;
@@ -57,6 +123,7 @@ export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
   const exportLibraryJson = () => {
     const payload = {
       exportedAt: new Date().toISOString(),
+      accountEmail: currentUser?.email || 'guest',
       totalClaimedCount: claimedGames.length,
       totalRetailValueSaved: Number(totalSaved.toFixed(2)),
       games: claimedGames.map((g) => ({
@@ -84,10 +151,13 @@ export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-800/80">
         <div>
           <p className="text-xs font-medium text-emerald-400 mb-1">
-            Personal Freebie Vault · Lifetime Value Tracker
+            Personal Freebie Vault ·{' '}
+            {currentUser
+              ? `Cloud Synced (${currentUser.email})`
+              : 'Local Guest Session'}
           </p>
           <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
-            Claimed Games & Savings Ledger
+            Claimed Games &amp; Savings Ledger
           </h1>
           <p className="text-sm text-slate-400 mt-1 max-w-2xl">
             Track every 100% off giveaway you have redeemed across Epic Games Store,
@@ -109,6 +179,15 @@ export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
               ${totalSaved.toFixed(2)}
             </div>
           </div>
+          {!currentUser && onOpenAuthModal && (
+            <button
+              onClick={onOpenAuthModal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span>Sync Library to Cloud Account</span>
+            </button>
+          )}
           {claimedGames.length > 0 && (
             <button
               onClick={exportLibraryJson}

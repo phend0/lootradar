@@ -475,14 +475,40 @@ async function startServer() {
     }
   });
 
-  app.get('/LootRadar-S26Ultra.apk', (_req, res) => {
-    const apkPath = path.join(__dirname, 'public', 'LootRadar-S26Ultra.apk');
+  const serveAndroidApk = (_req: express.Request, res: express.Response) => {
+    const apkPath = path.join(__dirname, 'public', 'LootRadar.apk');
     res.setHeader('Content-Type', 'application/vnd.android.package-archive');
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="LootRadar-S26Ultra.apk"'
+      'attachment; filename="LootRadar.apk"'
     );
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.sendFile(apkPath);
+  };
+
+  app.get('/LootRadar.apk', serveAndroidApk);
+  app.get('/LootRadar-S26Ultra.apk', serveAndroidApk);
+
+  app.get('/LootRadar-iOS.mobileconfig', (_req, res) => {
+    const profilePath = path.join(__dirname, 'public', 'LootRadar-iOS.mobileconfig');
+    res.setHeader('Content-Type', 'application/x-apple-aspen-config');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="LootRadar-iOS.mobileconfig"'
+    );
+    res.setHeader('Cache-Control', 'no-store');
+    res.sendFile(profilePath);
+  });
+
+  app.get('/LootRadar-iOS.ipa', (_req, res) => {
+    const ipaPath = path.join(__dirname, 'public', 'LootRadar-iOS.ipa');
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="LootRadar-iOS.ipa"'
+    );
+    res.setHeader('Cache-Control', 'no-store');
+    res.sendFile(ipaPath);
   });
 
   if (process.env.NODE_ENV !== 'production') {

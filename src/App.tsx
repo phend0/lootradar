@@ -3,12 +3,14 @@ import {
   BellRing,
   Check,
   Clock,
+  Download,
   ExternalLink,
   RefreshCw,
   Search,
-  Smartphone,
   X,
   SlidersHorizontal,
+  UserCheck,
+  UserPlus,
 } from 'lucide-react';
 import {
   GiveawayGame,
@@ -34,12 +36,32 @@ import { GameCoverArt } from './components/GameCoverArt';
 import { GameDetailModal } from './components/GameDetailModal';
 import { AlertsCenterView } from './components/AlertsCenterView';
 import { ClaimedLibraryView } from './components/ClaimedLibraryView';
-import { AndroidApkModal } from './components/AndroidApkModal';
 import {
   PlatformIcon,
   PlatformIconList,
   StoreIcon,
 } from './components/PlatformIcons';
+import { MobileAppDownloadModal } from './components/MobileAppDownloadModal';
+import { AuthModal } from './components/AuthModal';
+import {
+  auth,
+  db,
+  User,
+  CloudClaimRecord,
+  OperationType,
+  collection,
+  doc,
+  query,
+  where,
+  onAuthStateChanged,
+  onSnapshot,
+  ensureUserProfileAndSyncGuestClaims,
+  saveClaimToCloud,
+  removeClaimFromCloud,
+  updateAlertPrefsInCloud,
+  handleFirestoreError,
+  sanitizeDocId,
+} from './firebase';
 import { fetchClientSideLiveGiveaways } from './utils/liveFeedClient';
 import { isEligibleGiveawayGame } from './utils/gameEligibility';
 
@@ -146,7 +168,14 @@ export default function App() {
 
   // Selected Game for Modal Inspection
   const [selectedGame, setSelectedGame] = useState<GiveawayGame | null>(null);
-  const [isApkModalOpen, setIsApkModalOpen] = useState<boolean>(false);
+
+  // Modals & Cloud User Auth State
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [cloudClaims, setCloudClaims] = useState<CloudClaimRecord[]>([]);
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
 
   // Radar Filter & Sort State
   const [selectedStore, setSelectedStore] = useState<StoreId | 'all'>('all');
@@ -199,6 +228,104 @@ export default function App() {
   useEffect(() => {
     syncLiveGiveaways(false);
   }, []);
+
+  // Listen to Firebase Auth state and sync user profile + guest claims
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      setIsAuthReady(true);
+      if (user) {
+        setIsSyncingCloud(true);
+        try {
+          await ensureUserProfileAndSyncGuestClaims(
+            user,
+            claimedIds,
+            giveaways,
+            prefs.browserPushEnabled,
+            prefs.monitoredStores
+          );
+        } catch {
+          // Handled inside firebase helper
+        } finally {
+          setIsSyncingCloud(false);
+        }
+      } else {
+        setCloudClaims([]);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Attach real-time Firestore listeners for user profile and claimed games when authenticated
+  useEffect(() => {
+    if (!isAuthReady || !currentUser) return;
+    const uid = sanitizeDocId(currentUser.uid);
+    const claimsPath = `users/${uid}/claims`;
+    const claimsQuery = query(
+      collection(db, 'users', uid, 'claims'),
+      where('uid', '==', uid)
+    );
+
+    const unsubscribeClaims = onSnapshot(
+      claimsQuery,
+      (snapshot) => {
+        const records: CloudClaimRecord[] = [];
+        const cloudGameIds = new Set<string>();
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as CloudClaimRecord;
+          records.push(data);
+          cloudGameIds.add(data.gameId);
+        });
+        setCloudClaims(records);
+
+        // Ensure all cloud-claimed games are reflected in claimedIds
+        setClaimedIds((prev) => {
+          const merged = new Set(prev);
+          for (const g of giveaways) {
+            const sId = sanitizeDocId(g.id);
+            if (cloudGameIds.has(sId) || cloudGameIds.has(g.id)) {
+              merged.add(g.id);
+            }
+          }
+          for (const cid of cloudGameIds) {
+            merged.add(cid);
+          }
+          return Array.from(merged);
+        });
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, claimsPath);
+      }
+    );
+
+    const userPath = `users/${uid}`;
+    const unsubscribeProfile = onSnapshot(
+      doc(db, 'users', uid),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (Array.isArray(data.notifyStores)) {
+            setPrefs((prev) => ({
+              ...prev,
+              browserPushEnabled:
+                typeof data.pushEnabled === 'boolean'
+                  ? data.pushEnabled
+                  : prev.browserPushEnabled,
+              monitoredStores: data.notifyStores,
+            }));
+          }
+        }
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.GET, userPath);
+      }
+    );
+
+    return () => {
+      unsubscribeClaims();
+      unsubscribeProfile();
+    };
+  }, [isAuthReady, currentUser, giveaways]);
 
   // 1-second live countdown ticker
   useEffect(() => {
@@ -341,10 +468,41 @@ export default function App() {
     }
   };
 
+  const isGameClaimed = (gameId: string): boolean => {
+    const sId = sanitizeDocId(gameId);
+    return claimedIds.includes(gameId) || claimedIds.includes(sId);
+  };
+
   const handleToggleClaimed = (gameId: string) => {
-    setClaimedIds((prev) =>
-      prev.includes(gameId) ? prev.filter((id) => id !== gameId) : [...prev, gameId]
-    );
+    const sId = sanitizeDocId(gameId);
+    const currentlyClaimed =
+      claimedIds.includes(gameId) || claimedIds.includes(sId);
+
+    setClaimedIds((prev) => {
+      if (currentlyClaimed) {
+        return prev.filter((id) => id !== gameId && sanitizeDocId(id) !== sId);
+      }
+      return Array.from(new Set([...prev, gameId]));
+    });
+
+    if (currentUser) {
+      if (currentlyClaimed) {
+        removeClaimFromCloud(currentUser, gameId).catch(() => {});
+      } else {
+        const targetGame = giveaways.find(
+          (g) => g.id === gameId || sanitizeDocId(g.id) === sId
+        );
+        if (targetGame) {
+          saveClaimToCloud(currentUser, targetGame).catch(() => {});
+        }
+      }
+    }
+  };
+
+  const handleMarkClaimedOnStoreVisit = (game: GiveawayGame) => {
+    if (!isGameClaimed(game.id)) {
+      handleToggleClaimed(game.id);
+    }
   };
 
   // Active & Expiring Giveaways (excluding upcoming, strictly paid games/expansions/official Steam playtests)
@@ -555,14 +713,39 @@ export default function App() {
             </a>
           </nav>
 
-          {/* Zone 3: Primary Action */}
-          <div className="flex items-center shrink-0">
+          {/* Zone 3: Top-Right Download App (Android & iOS) + User Account Actions */}
+          <div className="flex items-center gap-2.5 shrink-0">
             <button
-              onClick={() => setIsApkModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              onClick={() => setIsDownloadModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-100 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>S26 Ultra APK</span>
+              <Download className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Download App</span>
+            </button>
+
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                currentUser
+                  ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300'
+                  : 'bg-cyan-400 hover:bg-cyan-300 text-slate-950'
+              }`}
+            >
+              {currentUser ? (
+                <>
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span className="max-w-[120px] truncate">
+                    {currentUser.displayName ||
+                      currentUser.email?.split('@')[0] ||
+                      'Account'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Sign In / Sign Up</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -716,6 +899,7 @@ export default function App() {
                         href={headlinerGame.claimUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => handleMarkClaimedOnStoreVisit(headlinerGame)}
                         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-xs transition-colors whitespace-nowrap shrink-0"
                       >
                         <StoreIcon
@@ -723,7 +907,9 @@ export default function App() {
                           className="w-3.5 h-3.5"
                         />
                         <span>
-                          Claim Free on {STORE_META[headlinerGame.store].shortName}
+                          {isGameClaimed(headlinerGame.id)
+                            ? `Claimed on ${STORE_META[headlinerGame.store].shortName}`
+                            : `Claim Free on ${STORE_META[headlinerGame.store].shortName}`}
                         </span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
@@ -731,14 +917,14 @@ export default function App() {
                       <button
                         onClick={() => handleToggleClaimed(headlinerGame.id)}
                         className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                          claimedIds.includes(headlinerGame.id)
+                          isGameClaimed(headlinerGame.id)
                             ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
                             : 'bg-slate-950/85 border-slate-700 text-slate-200 hover:border-slate-500'
                         }`}
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>
-                          {claimedIds.includes(headlinerGame.id)
+                          {isGameClaimed(headlinerGame.id)
                             ? 'Claimed'
                             : 'Mark Claimed'}
                         </span>
@@ -840,9 +1026,10 @@ export default function App() {
                                 href={expGame.claimUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => handleMarkClaimedOnStoreVisit(expGame)}
                                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold text-xs transition-colors"
                               >
-                                <span>Claim</span>
+                                <span>{claimed ? 'Claimed' : 'Claim'}</span>
                                 <ExternalLink className="w-3 h-3" />
                               </a>
                             </div>
@@ -1249,11 +1436,16 @@ export default function App() {
                             href={game.claimUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => handleMarkClaimedOnStoreVisit(game)}
                             title={`Open ${game.title} on ${storeMeta.name}`}
                             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-xs transition-colors whitespace-nowrap shrink-0"
                           >
                             <StoreIcon store={game.store} className="w-3.5 h-3.5" />
-                            <span>Claim on {storeMeta.shortName}</span>
+                            <span>
+                              {isClaimed
+                                ? `Claimed on ${storeMeta.shortName}`
+                                : `Claim on ${storeMeta.shortName}`}
+                            </span>
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>
@@ -1429,9 +1621,12 @@ export default function App() {
           <ClaimedLibraryView
             giveaways={giveaways}
             claimedIds={claimedIds}
+            cloudClaims={cloudClaims}
+            currentUser={currentUser}
             onToggleClaimed={handleToggleClaimed}
             onSelectGame={(game) => setSelectedGame(game)}
             onExploreRadar={() => setActiveTab('radar')}
+            onOpenAuthModal={() => setIsAuthModalOpen(true)}
           />
         )}
 
@@ -1442,9 +1637,19 @@ export default function App() {
             permissionStatus={permissionStatus}
             alerts={alerts}
             giveaways={giveaways}
-            onUpdatePrefs={(updated) =>
-              setPrefs((prev) => ({ ...prev, ...updated }))
-            }
+            onUpdatePrefs={(updated) => {
+              setPrefs((prev) => {
+                const next = { ...prev, ...updated };
+                if (currentUser) {
+                  updateAlertPrefsInCloud(
+                    currentUser,
+                    next.browserPushEnabled,
+                    next.monitoredStores
+                  ).catch(() => {});
+                }
+                return next;
+              });
+            }}
             onRequestBrowserPermission={handleRequestBrowserPermission}
             onSimulateAlert={handleSimulateAlert}
             onMarkAllRead={() =>
@@ -1463,9 +1668,9 @@ export default function App() {
       <footer className="border-t border-slate-800/80 py-6 mt-12">
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <div>
-            LootRadar — Live Freebie Games Radar & Multi-Store Giveaway Tracker
+            LootRadar — Live Freebie Games Radar &amp; Cloud Claim Tracker
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             <button
               onClick={() => setActiveTab('radar')}
               className="hover:text-slate-200 transition-colors cursor-pointer"
@@ -1479,16 +1684,16 @@ export default function App() {
               Upcoming Drops
             </button>
             <button
-              onClick={() => setActiveTab('alerts')}
+              onClick={() => setIsDownloadModalOpen(true)}
               className="hover:text-slate-200 transition-colors cursor-pointer"
             >
-              Push Notification Rules
+              Android &amp; iOS Apps
             </button>
             <button
-              onClick={() => setIsApkModalOpen(true)}
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors cursor-pointer"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="hover:text-slate-200 transition-colors cursor-pointer"
             >
-              Download S26 Ultra APK
+              {currentUser ? 'Cloud Account' : 'Sign In / Sign Up'}
             </button>
           </div>
         </div>
@@ -1498,16 +1703,43 @@ export default function App() {
       <GameDetailModal
         game={selectedGame}
         nowMs={nowMs}
-        isClaimed={selectedGame ? claimedIds.includes(selectedGame.id) : false}
+        isClaimed={selectedGame ? isGameClaimed(selectedGame.id) : false}
         onClose={() => setSelectedGame(null)}
         onToggleClaimed={handleToggleClaimed}
         onTriggerTestAlert={handleTriggerAlertForGame}
       />
 
-      {/* Samsung S26 Ultra APK & Mobile Install Modal */}
-      <AndroidApkModal
-        isOpen={isApkModalOpen}
-        onClose={() => setIsApkModalOpen(false)}
+      {/* Mobile App Download Modal (Android APK & iOS .mobileconfig/.ipa) */}
+      <MobileAppDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+      />
+
+      {/* User Account & Cloud Sync Modal (Google, Apple, Email/Password) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        currentUser={currentUser}
+        claimedCount={claimedIds.length}
+        totalSavedUsd={totalClaimedSavings}
+        isSyncingCloud={isSyncingCloud}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={async (user) => {
+          setCurrentUser(user);
+          setIsSyncingCloud(true);
+          try {
+            await ensureUserProfileAndSyncGuestClaims(
+              user,
+              claimedIds,
+              giveaways,
+              prefs.browserPushEnabled,
+              prefs.monitoredStores
+            );
+          } catch {
+            // Handled in firebase helper
+          } finally {
+            setIsSyncingCloud(false);
+          }
+        }}
       />
     </div>
   );

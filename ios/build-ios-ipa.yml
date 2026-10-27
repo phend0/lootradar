@@ -1,0 +1,61 @@
+name: Build iOS IPA & Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ios-ipa:
+    name: Compile iPhone IPA (macOS Xcode)
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and build web bundle
+        run: |
+          npm install
+          npm run build
+          rm -rf ios/LootRadar/www
+          mkdir -p ios/LootRadar/www
+          cp -r dist/* ios/LootRadar/www/
+          rm -f ios/LootRadar/www/LootRadar.apk ios/LootRadar/www/LootRadar-iOS.ipa ios/LootRadar/www/LootRadar-iOS.mobileconfig
+          sed -i '' 's|src="/|src="|g; s|href="/|href="|g' ios/LootRadar/www/index.html
+
+      - name: Generate Xcode Project with XcodeGen
+        run: |
+          brew install xcodegen ldid
+          cd ios
+          xcodegen generate
+
+      - name: Compile ARM64 iOS App & Package IPA
+        run: |
+          cd ios
+          xcodebuild -project LootRadar.xcodeproj \
+            -scheme LootRadar \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/LootRadar.app Payload/
+          ldid -S Payload/LootRadar.app/LootRadar
+          zip -r9 ../public/LootRadar-iOS.ipa Payload
+
+      - name: Upload Compiled iPhone IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LootRadar-iOS-IPA
+          path: public/LootRadar-iOS.ipa
+          if-no-files-found: error
