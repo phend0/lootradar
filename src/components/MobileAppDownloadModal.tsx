@@ -75,7 +75,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
     if (isDownloadingApk) return;
     setIsDownloadingApk(true);
     try {
-      const res = await fetch(`/LootRadar.apk?t=${Date.now()}`, {
+      const res = await fetch(`./LootRadar.apk?t=${Date.now()}`, {
         cache: 'no-store',
       });
       if (!res.ok) throw new Error('Direct link fallback');
@@ -102,9 +102,9 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
         setTimeout(() => URL.revokeObjectURL(url), 5000);
         return;
       }
-      window.location.href = '/LootRadar.apk';
+      window.location.href = './LootRadar.apk';
     } catch {
-      window.location.href = '/LootRadar.apk';
+      window.location.href = './LootRadar.apk';
     } finally {
       setIsDownloadingApk(false);
     }
@@ -201,7 +201,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                   <a
-                    href="/LootRadar.apk"
+                    href="./LootRadar.apk"
                     download="LootRadar.apk"
                     onClick={handleVerifiedApkDownload}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition-colors"
@@ -266,7 +266,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <a
-                    href="/LootRadar-iOS.mobileconfig"
+                    href="./LootRadar-iOS.mobileconfig"
                     download="LootRadar-iOS.mobileconfig"
                     className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition-colors"
                   >
@@ -275,7 +275,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                   </a>
 
                   <a
-                    href="/LootRadar-iOS.ipa"
+                    href="./LootRadar-iOS.ipa"
                     download="LootRadar-iOS.ipa"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-colors"
                   >

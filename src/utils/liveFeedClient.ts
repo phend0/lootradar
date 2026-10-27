@@ -32,9 +32,17 @@ async function fetchJsonWithAndroidFallback(url: string): Promise<any> {
     }
   }
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(url);
+    if (res.ok) return await res.json();
+  } catch {
+    // Fall through to CORS proxy for static hosting (e.g., GitHub Pages)
+  }
+
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const proxyRes = await fetch(proxyUrl);
+  if (!proxyRes.ok) throw new Error(`HTTP ${proxyRes.status}`);
+  return proxyRes.json();
 }
 
 export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
