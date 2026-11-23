@@ -88,10 +88,14 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
                 <PlatformIconList platforms={game.platforms} />
                 <span aria-hidden="true">·</span>
                 <span>{game.releaseYear}</span>
-                <span aria-hidden="true">·</span>
-                <span className="font-mono tabular-nums text-emerald-400">
-                  {game.ratingScore}% Positive
-                </span>
+                {game.ratingScore !== undefined && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono tabular-nums text-emerald-400">
+                      Metacritic {game.ratingScore}
+                    </span>
+                  </>
+                )}
               </div>
               <h2
                 id="modal-game-title"
@@ -131,6 +135,8 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
                 <div className="text-xs text-slate-400">
                   {game.status === 'upcoming'
                     ? 'Giveaway Unlocks In'
+                    : countdown.totalHours === Infinity
+                    ? 'Claim Window'
                     : countdown.isUrgent
                     ? 'Urgent — Giveaway Ends In'
                     : 'Claim Window Remaining'}
@@ -297,9 +303,10 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
           </div>
 
           {/* System Requirements */}
+          {game.systemRequirements ? (
           <div className="pt-5 border-t border-slate-800/80">
             <h3 className="text-sm font-semibold text-slate-200 mb-3">
-              Recommended System Specifications
+              Minimum System Requirements (from Steam)
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
               <div className="space-y-1">
@@ -343,6 +350,12 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
               </div>
             </div>
           </div>
+          ) : (
+            <p className="pt-5 border-t border-slate-800/80 text-xs text-slate-400">
+              System requirements aren't available here. Check the store page before
+              installing.
+            </p>
+          )}
         </div>
       </div>
     </div>

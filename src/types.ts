@@ -31,12 +31,14 @@ export interface GiveawayGame {
   publisher: string;
   developer: string;
   releaseYear: number;
-  ratingScore: number;
+  /** Metacritic score from the Steam listing. Absent when none exists. */
+  ratingScore?: number;
   drmType: string;
   claimUrl: string;
   description: string;
   highlights: string[];
-  systemRequirements: SystemRequirements;
+  /** Minimum PC requirements from Steam. Absent when unknown. */
+  systemRequirements?: SystemRequirements;
   isHeadliner?: boolean;
 }
 

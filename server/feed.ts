@@ -1,12 +1,14 @@
 import { INITIAL_GIVEAWAYS } from '../src/data/giveaways';
 import { GiveawayGame, PlatformId, StoreId } from '../src/types';
 import {
+  OPEN_ENDED_DATE,
   COSMETIC_AND_NONGAME_BLOCKLIST_REGEX,
   isEligibleGamerPowerOffer,
   isEligibleGiveawayGame,
   parseRetailWorth,
   withCurrentStatus,
 } from '../src/utils/gameEligibility';
+import { enrichWithSteamMetadata } from './steamMetadata';
 
 let cachedGiveaways: GiveawayGame[] | null = null;
 let lastFetchTimestamp = 0;
@@ -186,7 +188,6 @@ async function fetchLiveEpicGiveaways(): Promise<GiveawayGame[]> {
       publisher: sellerName,
       developer: sellerName,
       releaseYear: 2025,
-      ratingScore: 90,
       drmType: 'Epic Games Store (Keep Forever)',
       claimUrl,
       description:
@@ -199,13 +200,6 @@ async function fetchLiveEpicGiveaways(): Promise<GiveawayGame[]> {
           ? `Unlocks on ${new Date(startDateIso).toUTCString()}`
           : `Free claim window open until ${new Date(endDateIso).toUTCString()}`,
       ],
-      systemRequirements: {
-        os: 'Windows 10 / 11 (64-bit)',
-        processor: 'Intel Core i5 or AMD Ryzen 5 equivalent',
-        memory: '8 GB RAM',
-        graphics: 'DirectX 11 / 12 compatible GPU',
-        storage: '10 GB available space',
-      },
       isHeadliner:
         !isUpcoming &&
         results.filter((r) => r.status !== 'upcoming').length === 0,
@@ -380,7 +374,6 @@ async function fetchLiveAmazonLunaGiveaways(): Promise<GiveawayGame[]> {
         publisher: 'Amazon Games (Luna)',
         developer: 'Verified Partner Studio',
         releaseYear: 2024,
-        ratingScore: 89,
         drmType: drmLabel,
         claimUrl,
         description:
@@ -391,13 +384,6 @@ async function fetchLiveAmazonLunaGiveaways(): Promise<GiveawayGame[]> {
           `Official Retail Value: $${price.toFixed(2)} USD — 100% Free on luna.amazon.com`,
           `Redemption: ${drmLabel}`,
         ],
-        systemRequirements: {
-          os: 'Windows 10 / 11 (64-bit)',
-          processor: 'Intel Core i5 or AMD Ryzen 5 equivalent',
-          memory: '8 GB RAM',
-          graphics: 'DirectX 11 / 12 compatible GPU',
-          storage: '15 GB available space',
-        },
       });
     }
 
@@ -508,7 +494,7 @@ async function fetchLiveGamerPowerGiveaways(): Promise<GiveawayGame[]> {
     const parsedWorth =
       parseRetailWorth(item.worth) || (isSteamPlaytest ? 14.99 : 9.99);
 
-    let endDateIso = new Date(now + 6 * 86400000).toISOString();
+    let endDateIso = OPEN_ENDED_DATE;
     if (item.end_date && item.end_date !== 'N/A') {
       const parsedEnd = new Date(
         String(item.end_date).replace(' ', 'T') + 'Z'
@@ -556,7 +542,6 @@ async function fetchLiveGamerPowerGiveaways(): Promise<GiveawayGame[]> {
       publisher: storeName,
       developer: 'Verified Store Partner',
       releaseYear: 2025,
-      ratingScore: 88,
       drmType: `${storeName} Direct Claim`,
       claimUrl: directUrl,
       description:
@@ -569,13 +554,6 @@ async function fetchLiveGamerPowerGiveaways(): Promise<GiveawayGame[]> {
           : `Redeem directly on ${storeName} before expiration`,
         `Retail value: $${parsedWorth.toFixed(2)} USD — 100% Off ($0.00)`,
       ],
-      systemRequirements: {
-        os: 'Windows 10 / 11 (64-bit)',
-        processor: 'Dual-Core 2.4 GHz or higher',
-        memory: '8 GB RAM',
-        graphics: 'DirectX 11 compatible GPU',
-        storage: '12 GB available space',
-      },
     });
   }
 
@@ -660,9 +638,10 @@ export async function getAggregatedGiveaways(
         });
       }
 
-      cachedGiveaways = deduped;
+      const enriched = await enrichWithSteamMetadata(deduped);
+      cachedGiveaways = enriched;
       lastFetchTimestamp = Date.now();
-      return deduped;
+      return enriched;
     }
   } catch {
     // Fallback to verified INITIAL_GIVEAWAYS if offline

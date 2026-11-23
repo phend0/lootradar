@@ -70,7 +70,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Skybound Game Studios, Inc.',
     developer: 'Wales Interactive',
     releaseYear: 2024,
-    ratingScore: 89,
     drmType: 'Epic Games Store (Keep Forever)',
     claimUrl: 'https://store.epicgames.com/en-US/p/sker-ritual-aac702',
     description:
@@ -80,13 +79,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $24.99 USD — 100% Free ($0.00) until October 29 at 15:00 UTC',
       'Full standalone paid game — yours to keep forever',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-4590 or AMD FX 8350',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 970 or AMD Radeon R9 290',
-      storage: '15 GB available space',
-    },
     isHeadliner: true,
   },
 
@@ -109,7 +101,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'BancyCo',
     developer: 'Benjamin Rivers Inc.',
     releaseYear: 2012,
-    ratingScore: 86,
     drmType: 'Epic Games Store (Keep Forever)',
     claimUrl: 'https://store.epicgames.com/en-US/p/home-19212a',
     description:
@@ -119,13 +110,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $4.99 USD — 100% Free until October 29 at 15:00 UTC',
       'Adaptive narrative that shifts based on your choices and discoveries',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11',
-      processor: '1.8 GHz Dual Core',
-      memory: '2 GB RAM',
-      graphics: 'DirectX 9 / 11 compatible GPU',
-      storage: '500 MB available space',
-    },
   },
 
   // 3. LIVE EPIC GAMES STORE PAID GAME #3 (EXPIRING IN < 48H)
@@ -146,7 +130,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Epic Games Partner',
     developer: 'Indie Developer',
     releaseYear: 2025,
-    ratingScore: 85,
     drmType: 'Epic Games Store Direct Activation',
     claimUrl: 'https://store.epicgames.com/p/dimond-hunt-03a766',
     description:
@@ -156,13 +139,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Saves $7.99 USD — 100% discount active until October 27',
       'Full standalone paid game added permanently to your Epic library',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i3 or AMD Ryzen 3',
-      memory: '8 GB RAM',
-      graphics: 'DirectX 11 compatible GPU',
-      storage: '4 GB available space',
-    },
   },
 
   // 4. LIVE EPIC GAMES STORE PAID GAME #4
@@ -183,7 +159,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Epic Games Partner',
     developer: 'Indie Studio',
     releaseYear: 2025,
-    ratingScore: 83,
     drmType: 'Epic Games Store Direct Activation',
     claimUrl: 'https://store.epicgames.com/p/mafia-hotel-eaea4c',
     description:
@@ -193,13 +168,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       '100% discount ($1.99 → $0.00) until November 1',
       'Permanent full-game license on Epic Games Store',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5 or equivalent',
-      memory: '8 GB RAM',
-      graphics: 'DirectX 11 compatible GPU',
-      storage: '5 GB available space',
-    },
   },
 
   // 5. LIVE EPIC GAMES STORE PAID GAME #5
@@ -220,7 +188,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Epic Games Partner',
     developer: 'Indie Studio',
     releaseYear: 2025,
-    ratingScore: 84,
     drmType: 'Epic Games Store Direct Activation',
     claimUrl: 'https://store.epicgames.com/p/gethighexe-c83d1f',
     description:
@@ -230,13 +197,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       '100% free to claim and keep permanently',
       'Fast-paced speedrun leaderboards and vertical challenges',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5 or equivalent',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1050 or Radeon RX 560',
-      storage: '4 GB available space',
-    },
   },
 
   // 6. LIVE ITCH.IO PAID FULL GAME
@@ -257,7 +217,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'WaleedZo',
     developer: 'WaleedZo',
     releaseYear: 2025,
-    ratingScore: 89,
     drmType: '100% DRM-Free Direct Claim on itch.io',
     claimUrl: 'https://waleedzo.itch.io/the-green-light',
     description:
@@ -267,13 +226,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Saves $9.99 USD — 100% Free full game download',
       'No third-party launcher required',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-7400 or AMD Ryzen 5 1600',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1060 (6 GB)',
-      storage: '7 GB available space',
-    },
   },
 
   // 7. LIVE STEAM PAID GAME KEY GIVEAWAY
@@ -294,7 +246,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Crate Studios',
     developer: 'Crate Studios',
     releaseYear: 2024,
-    ratingScore: 88,
     drmType: 'Steam Key Direct Activation (Keep Forever)',
     claimUrl:
       'https://na.alienwarearena.com/ucf/show/2175676/boards/contest-and-giveaways-global/Giveaway/dwarven-realms-steam-game-key-giveaway',
@@ -305,13 +256,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Activates the full $9.99 paid game permanently on Steam',
       'Full controller and Steam Deck support',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-8400 or AMD Ryzen 5 2600',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1060 or Radeon RX 580',
-      storage: '10 GB available space',
-    },
   },
 
   // 8. OFFICIAL STEAM PLAYTEST KEY #1
@@ -332,7 +276,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Steam Playtest Partner',
     developer: 'Fathom Reach Team',
     releaseYear: 2026,
-    ratingScore: 87,
     drmType: 'Official Steam Playtest Key',
     claimUrl:
       'https://www.alienwarearena.com/ucf/show/2176395/boards/contest-and-giveaways-global/Giveaway/fathom-reach-playtest-key-giveaway',
@@ -343,13 +286,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Instant Steam client activation via "Activate a Product on Steam"',
       'Official playable game build — zero cosmetics or filler',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5 or AMD Ryzen 5',
-      memory: '8 GB RAM',
-      graphics: 'DirectX 12 compatible GPU',
-      storage: '12 GB available space',
-    },
   },
 
   // 9. OFFICIAL STEAM PLAYTEST KEY #2
@@ -370,7 +306,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Steam Playtest Partner',
     developer: 'Scallywags Studio',
     releaseYear: 2026,
-    ratingScore: 86,
     drmType: 'Official Steam Playtest Key',
     claimUrl:
       'https://www.alienwarearena.com/ucf/show/2176306/boards/contest-and-giveaways-global/Giveaway/scallywags-early-playtest-key-giveaway',
@@ -381,13 +316,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official playable Steam beta key',
       'Supports online multiplayer co-op and PvP boarding skirmishes',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5 or AMD Ryzen 5',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1060 or equivalent',
-      storage: '10 GB available space',
-    },
   },
 
   // 10. LIVE INDIEGALA PAID FULL GAME #1
@@ -408,7 +336,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'IndieGala Freebies',
     developer: 'Indie Studio',
     releaseYear: 2025,
-    ratingScore: 85,
     drmType: '100% DRM-Free Standalone PC Download',
     claimUrl: 'https://freebies.indiegala.com/last-room',
     description:
@@ -418,13 +345,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Saves $29.99 USD off regular retail price',
       '100% DRM-Free standalone PC installer',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11',
-      processor: '2.0 GHz Dual Core Processor',
-      memory: '4 GB RAM',
-      graphics: 'DirectX 11 compatible GPU',
-      storage: '2 GB available space',
-    },
   },
 
   // 11. LIVE INDIEGALA PAID FULL GAME #2
@@ -445,7 +365,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'IndieGala Freebies',
     developer: 'Indie Studio',
     releaseYear: 2025,
-    ratingScore: 84,
     drmType: '100% DRM-Free Standalone PC Download',
     claimUrl: 'https://freebies.indiegala.com/best-plumber',
     description:
@@ -455,13 +374,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Saves $29.99 USD — 100% off full PC game',
       'Standalone DRM-free installer',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11',
-      processor: '2.0 GHz Dual Core',
-      memory: '4 GB RAM',
-      graphics: 'DirectX 11 compatible GPU',
-      storage: '1 GB available space',
-    },
   },
 
   // 12. LIVE GOG FULL STANDALONE EXPANSION / RPG
@@ -483,7 +395,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'The Chronicles Of Myrtana Team',
     developer: 'The Chronicles Of Myrtana Team',
     releaseYear: 2022,
-    ratingScore: 98,
     drmType: '100% DRM-Free Offline Installer + GOG Galaxy',
     claimUrl: 'https://www.gog.com/en/game/the_chronicles_of_myrtana_archolos',
     description:
@@ -493,13 +404,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       '100% DRM-Free standalone installer on GOG.com',
       'Overwhelmingly Positive 4.9/5 rating across thousands of reviews',
     ],
-    systemRequirements: {
-      os: 'Windows 7 / 8 / 10 / 11',
-      processor: 'Intel Core i3 / AMD Phenom II X4 or faster',
-      memory: '4 GB RAM',
-      graphics: 'DirectX 11 compatible GPU',
-      storage: '9 GB available space',
-    },
   },
 
   // 13. UPCOMING CONFIRMED 100% FREE EPIC GAMES STORE PAID GAME
@@ -521,7 +425,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Akupara Games',
     developer: 'à la mode games',
     releaseYear: 2024,
-    ratingScore: 95,
     drmType: 'Epic Games Store (Keep Forever)',
     claimUrl: 'https://store.epicgames.com/en-US/p/sorry-were-closed-724c86',
     description:
@@ -531,13 +434,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Confirmed 100% Free ($24.99 → $0.00) starting October 29 at 15:00 UTC',
       'Full standalone paid game — Overwhelmingly Positive reviews',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-6500 or AMD Ryzen 3 1200',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GeForce GTX 1050 Ti or Radeon RX 570',
-      storage: '4 GB available space',
-    },
   },
 
   // 14. LIVE AMAZON GAMES (LUNA) FREE PC GAME #1 (EXPIRING < 48H)
@@ -559,7 +455,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Squanch Games',
     developer: 'Squanch Games',
     releaseYear: 2022,
-    ratingScore: 91,
     drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
     claimUrl:
       'https://luna.amazon.com/claims/high-on-life-epic/dp/amzn1.pg.item.351cbaa9-ac70-4e47-93b6-1a4cb7dd38c8?ref_=SM_HighonLife_S01_FGWP_CRWN',
@@ -570,13 +465,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $39.99 USD — Free with Amazon Prime on luna.amazon.com',
       'Redeems full permanent game to your Epic Games Store account',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-4430K or AMD Ryzen 5 1600',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1060 (6 GB) or Radeon RX 580',
-      storage: '45 GB available space',
-    },
   },
 
   // 15. LIVE AMAZON GAMES (LUNA) FREE PC GAME #2
@@ -598,7 +486,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Nacon',
     developer: 'Hekate',
     releaseYear: 2023,
-    ratingScore: 87,
     drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
     claimUrl:
       'https://luna.amazon.com/claims/ad-infinitum-epic/dp/amzn1.pg.item.69de011b-6575-41ab-9964-971e59cf7457?ref_=SM_AdInfinitum_S01_FGWP_CRWN',
@@ -609,13 +496,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $34.99 USD — 100% Free on luna.amazon.com until November 25',
       'Permanent full-game license redeemed via Epic Games Store',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-8400 or AMD Ryzen 5 1600X',
-      memory: '12 GB RAM',
-      graphics: 'NVIDIA GTX 1060 or AMD Radeon RX 580',
-      storage: '20 GB available space',
-    },
   },
 
   // 16. LIVE AMAZON GAMES (LUNA) FREE PC GAME #3
@@ -637,7 +517,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Dear Villagers',
     developer: 'Studio Plane Toast',
     releaseYear: 2024,
-    ratingScore: 92,
     drmType: 'Amazon Games App / Luna Direct Claim (Keep Forever)',
     claimUrl:
       'https://luna.amazon.com/claims/caravan-sandwitch-aga/dp/amzn1.pg.item.98d2b591-efd2-420f-928c-e7a9b409f67a?ref_=SM_CaravanSandWitch_S01_FGWP_CRWN',
@@ -648,13 +527,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $24.99 USD — 100% Free on luna.amazon.com until December 16',
       'Yours to keep forever in the Amazon Games library',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-6600K or AMD Ryzen 5 1600',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 1060 or Radeon RX 580',
-      storage: '8 GB available space',
-    },
   },
 
   // 17. LIVE AMAZON GAMES (LUNA) FREE PC GAME #4
@@ -676,7 +548,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Nacon',
     developer: 'Big Bad Wolf',
     releaseYear: 2022,
-    ratingScore: 84,
     drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
     claimUrl:
       'https://luna.amazon.com/claims/vampire-the-masquerade-swansong-epic/dp/amzn1.pg.item.7885fee3-7dda-40c5-8642-596bb1f4a9b3?ref_=SM_VampireTheMasqueradeSwansong_S01_FGWP_CRWN',
@@ -687,13 +558,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $49.99 USD — 100% Free on luna.amazon.com until November 18',
       'Permanent full-game license redeemed via Epic Games Store',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-2300 or AMD FX-4350',
-      memory: '6 GB RAM',
-      graphics: 'NVIDIA GTX 770 or Radeon R9 280',
-      storage: '25 GB available space',
-    },
   },
 
   // 18. LIVE AMAZON GAMES (LUNA) FREE PC GAME #5
@@ -715,7 +579,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Mega Cat Studios',
     developer: 'Mega Cat Studios',
     releaseYear: 2024,
-    ratingScore: 95,
     drmType: 'Amazon Luna Claim → Epic Games Store (Keep Forever)',
     claimUrl:
       'https://luna.amazon.com/claims/five-nights-at-freddys-into-the-pit-epic/dp/amzn1.pg.item.9d2ad65c-0963-4e2d-93e6-75ad2a4bfc87?ref_=SM_FiveNightsatFreddysIntothePit_S01_FGWP_CRWN',
@@ -726,13 +589,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $19.99 USD — 100% Free on luna.amazon.com until November 4',
       'Permanent full-game license redeemed via Epic Games Store',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-750 or equivalent',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GeForce GTX 670 or Radeon R9 270X',
-      storage: '3 GB available space',
-    },
   },
 
   // 19. LIVE AMAZON GAMES (LUNA) FREE PC GAME #6
@@ -754,7 +610,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
     publisher: 'Bethesda Softworks',
     developer: 'id Software',
     releaseYear: 2016,
-    ratingScore: 96,
     drmType: 'Amazon Luna Claim → 100% DRM-Free GOG.com Code',
     claimUrl:
       'https://luna.amazon.com/claims/doom-gog/dp/amzn1.pg.item.b095156c-1207-49f0-801a-75ac03b74def?ref_=SM_DOOM_S01_FGWP_CRWN',
@@ -765,13 +620,6 @@ export const INITIAL_GIVEAWAYS: GiveawayGame[] = [
       'Official Retail Value: $19.99 USD — Free DRM-Free GOG Code on luna.amazon.com',
       'Yours to keep forever on GOG.com',
     ],
-    systemRequirements: {
-      os: 'Windows 10 / 11 (64-bit)',
-      processor: 'Intel Core i5-2400 or AMD FX-8320',
-      memory: '8 GB RAM',
-      graphics: 'NVIDIA GTX 670 (2 GB) or AMD Radeon HD 7870',
-      storage: '55 GB available space',
-    },
   },
 ];
 

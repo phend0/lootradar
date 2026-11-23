@@ -6,6 +6,9 @@ export const COSMETIC_AND_NONGAME_BLOCKLIST_REGEX =
 const STORY_EXPANSION_ALLOWLIST_REGEX =
   /\b(expansion|story\s*expansion|campaign\s*expansion|full\s*expansion)\b/i;
 
+/** Marks a giveaway whose source publishes no end date. */
+export const OPEN_ENDED_DATE = '9999-12-31T23:59:59.000Z';
+
 export function parseRetailWorth(worthRaw: unknown): number {
   if (typeof worthRaw === 'number') {
     return Number.isFinite(worthRaw) && worthRaw > 0 ? worthRaw : 0;

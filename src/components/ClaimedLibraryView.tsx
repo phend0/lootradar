@@ -81,7 +81,6 @@ export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
           publisher: c.storeName,
           developer: c.storeName,
           releaseYear: 2025,
-          ratingScore: 90,
           drmType: `${c.storeName} Permanent Library`,
           claimUrl: c.claimUrl,
           description: `Claimed and saved to your LootRadar Cloud Account on ${new Date(
@@ -91,13 +90,6 @@ export const ClaimedLibraryView: React.FC<ClaimedLibraryViewProps> = ({
             `Store Page: ${c.claimUrl}`,
             `Retail Value Saved: $${c.originalPrice.toFixed(2)} USD`,
           ],
-          systemRequirements: {
-            os: 'Windows 10 / 11 (64-bit)',
-            processor: 'Dual-Core 2.4 GHz or higher',
-            memory: '8 GB RAM',
-            graphics: 'DirectX 11 / 12 compatible GPU',
-            storage: '10 GB available space',
-          },
         });
       }
     }

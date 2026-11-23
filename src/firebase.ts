@@ -137,7 +137,34 @@ function clampString(val: string | null | undefined, max: number, fallback: stri
   return trimmed.slice(0, max);
 }
 
-export async function ensureUserProfileAndSyncGuestClaims(
+// Sign-in triggers this from two places. Run them in order so the second sees
+// what the first wrote, because the rules reject re-creating existing documents.
+const profileSyncQueue = new Map<string, Promise<void>>();
+
+export function ensureUserProfileAndSyncGuestClaims(
+  user: User,
+  localClaimedIds: string[],
+  allGiveaways: GiveawayGame[],
+  pushEnabled: boolean,
+  notifyStores: StoreId[]
+): Promise<void> {
+  const previous = profileSyncQueue.get(user.uid) ?? Promise.resolve();
+  const run = previous
+    .catch(() => {})
+    .then(() =>
+      syncProfileAndGuestClaims(
+        user,
+        localClaimedIds,
+        allGiveaways,
+        pushEnabled,
+        notifyStores
+      )
+    );
+  profileSyncQueue.set(user.uid, run);
+  return run;
+}
+
+async function syncProfileAndGuestClaims(
   user: User,
   localClaimedIds: string[],
   allGiveaways: GiveawayGame[],
@@ -196,16 +223,16 @@ export async function ensureUserProfileAndSyncGuestClaims(
     }
 
     // Merge any guest claimed games into Firestore atomically
-    const unsyncedClaimIds = localClaimedIds.filter(
-      (id) => !existingClaimIds.has(sanitizeDocId(id))
-    );
-    for (const rawGameId of unsyncedClaimIds.slice(0, 50)) {
+    const unsyncedClaims = new Map<string, GiveawayGame>();
+    for (const rawGameId of localClaimedIds) {
       const gameId = sanitizeDocId(rawGameId);
+      if (existingClaimIds.has(gameId) || unsyncedClaims.has(gameId)) continue;
       const foundGame = allGiveaways.find(
         (g) => sanitizeDocId(g.id) === gameId || g.id === rawGameId
       );
-      if (!foundGame) continue;
-
+      if (foundGame) unsyncedClaims.set(gameId, foundGame);
+    }
+    for (const [gameId, foundGame] of Array.from(unsyncedClaims).slice(0, 50)) {
       const claimRef = doc(db, 'users', uid, 'claims', gameId);
       const storeVal: StoreId = VALID_STORES.includes(foundGame.store)
         ? foundGame.store

@@ -63,7 +63,11 @@ import {
   sanitizeDocId,
 } from './firebase';
 import { fetchClientSideLiveGiveaways } from './utils/liveFeedClient';
-import { isEligibleGiveawayGame, withCurrentStatus } from './utils/gameEligibility';
+import {
+  OPEN_ENDED_DATE,
+  isEligibleGiveawayGame,
+  withCurrentStatus,
+} from './utils/gameEligibility';
 
 const FEED_POLL_INTERVAL_MS = 15 * 60 * 1000;
 const FEED_RESUME_MIN_AGE_MS = 5 * 60 * 1000;
@@ -151,6 +155,13 @@ export default function App() {
     }
   });
 
+  const claimedIdsRef = useRef(claimedIds);
+  claimedIdsRef.current = claimedIds;
+  const claimedKeys = useMemo(
+    () => new Set(claimedIds.map(sanitizeDocId)),
+    [claimedIds]
+  );
+
   // Persistent Notification Prefs
   const [prefs, setPrefs] = useState<NotificationPrefs>(() => {
     try {
@@ -170,6 +181,11 @@ export default function App() {
       return INITIAL_ALERTS;
     }
   });
+
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
+  const signedInUidRef = useRef<string | null>(null);
+  const cloudClaimKeysRef = useRef<Set<string>>(new Set());
 
   const [permissionStatus, setPermissionStatus] = useState<
     NotificationPermission | 'unsupported'
@@ -268,15 +284,17 @@ export default function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       setIsAuthReady(true);
+      const wasSignedIn = signedInUidRef.current !== null;
+      signedInUidRef.current = user?.uid ?? null;
       if (user) {
         setIsSyncingCloud(true);
         try {
           await ensureUserProfileAndSyncGuestClaims(
             user,
-            claimedIds,
+            claimedIdsRef.current,
             giveawaysRef.current,
-            prefs.browserPushEnabled,
-            prefs.monitoredStores
+            prefsRef.current.browserPushEnabled,
+            prefsRef.current.monitoredStores
           );
         } catch {
           // Handled inside firebase helper
@@ -284,6 +302,15 @@ export default function App() {
           setIsSyncingCloud(false);
         }
       } else {
+        // Saved claims return on sign-in. Removing them here keeps them from
+        // being copied into a different account on a shared device.
+        if (wasSignedIn) {
+          const savedKeys = cloudClaimKeysRef.current;
+          setClaimedIds((prev) =>
+            prev.filter((id) => !savedKeys.has(sanitizeDocId(id)))
+          );
+        }
+        cloudClaimKeysRef.current = new Set();
         setCloudClaims([]);
       }
     });
@@ -311,20 +338,22 @@ export default function App() {
           cloudGameIds.add(data.gameId);
         });
         setCloudClaims(records);
+        cloudClaimKeysRef.current = new Set(
+          Array.from(cloudGameIds, sanitizeDocId)
+        );
 
-        // Ensure all cloud-claimed games are reflected in claimedIds
+        // Ensure all cloud-claimed games are reflected once in claimedIds
         setClaimedIds((prev) => {
-          const merged = new Set(prev);
-          for (const g of giveawaysRef.current) {
-            const sId = sanitizeDocId(g.id);
-            if (cloudGameIds.has(sId) || cloudGameIds.has(g.id)) {
-              merged.add(g.id);
+          const keys = new Set(prev.map(sanitizeDocId));
+          const merged = [...prev];
+          for (const cid of cloudGameIds) {
+            const key = sanitizeDocId(cid);
+            if (!keys.has(key)) {
+              keys.add(key);
+              merged.push(cid);
             }
           }
-          for (const cid of cloudGameIds) {
-            merged.add(cid);
-          }
-          return Array.from(merged);
+          return merged;
         });
       },
       (error) => {
@@ -438,7 +467,9 @@ export default function App() {
       });
     } else if (type === 'expiring_soon') {
       const expiringGame =
-        giveaways.find((g) => g.status === 'expiring') || giveaways[1] || giveaways[0];
+        giveaways.find((g) => g.status === 'expiring') ||
+        giveaways.find((g) => g.endDate !== OPEN_ENDED_DATE);
+      if (!expiringGame) return;
       const countdown = formatCountdown(expiringGame.endDate, nowMs);
       triggerPushAlert({
         id: `alert-${Date.now()}`,
@@ -504,14 +535,12 @@ export default function App() {
   };
 
   const isGameClaimed = (gameId: string): boolean => {
-    const sId = sanitizeDocId(gameId);
-    return claimedIds.includes(gameId) || claimedIds.includes(sId);
+    return claimedKeys.has(sanitizeDocId(gameId));
   };
 
   const handleToggleClaimed = (gameId: string) => {
     const sId = sanitizeDocId(gameId);
-    const currentlyClaimed =
-      claimedIds.includes(gameId) || claimedIds.includes(sId);
+    const currentlyClaimed = claimedKeys.has(sId);
 
     setClaimedIds((prev) => {
       if (currentlyClaimed) {
@@ -570,7 +599,8 @@ export default function App() {
   // Urgent / Soonest Ending Games (Top 3 soonest ending live giveaways)
   const expiringGames = useMemo(
     () =>
-      [...liveGiveaways]
+      liveGiveaways
+        .filter((g) => g.endDate !== OPEN_ENDED_DATE)
         .sort(
           (a, b) =>
             new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
@@ -591,7 +621,7 @@ export default function App() {
           return false;
         }
         if (statusFilter === 'expiring' && game.status !== 'expiring') return false;
-        if (statusFilter === 'unclaimed' && claimedIds.includes(game.id))
+        if (statusFilter === 'unclaimed' && isGameClaimed(game.id))
           return false;
 
         if (searchQuery.trim()) {
@@ -612,7 +642,7 @@ export default function App() {
         if (sortBy === 'highest_value') {
           return b.originalPrice - a.originalPrice;
         }
-        return b.ratingScore - a.ratingScore;
+        return (b.ratingScore ?? -1) - (a.ratingScore ?? -1);
       });
   }, [
     liveGiveaways,
@@ -621,7 +651,7 @@ export default function App() {
     statusFilter,
     sortBy,
     searchQuery,
-    claimedIds,
+    claimedKeys,
   ]);
 
   // Filtered Upcoming Giveaways
@@ -648,9 +678,9 @@ export default function App() {
   const totalClaimedSavings = useMemo(
     () =>
       giveaways
-        .filter((g) => claimedIds.includes(g.id))
+        .filter((g) => claimedKeys.has(sanitizeDocId(g.id)))
         .reduce((acc, g) => acc + g.originalPrice, 0),
-    [giveaways, claimedIds]
+    [giveaways, claimedKeys]
   );
 
   const endingSoonCount = useMemo(
@@ -729,7 +759,7 @@ export default function App() {
                   : 'text-slate-400 hover:text-slate-100 border-transparent'
               }`}
             >
-              Claimed ({claimedIds.length})
+              Claimed ({claimedKeys.size})
             </a>
 
             <a
@@ -791,7 +821,7 @@ export default function App() {
             [
               { id: 'radar', label: `Radar (${liveGiveaways.length})` },
               { id: 'upcoming', label: `Upcoming (${upcomingGiveaways.length})` },
-              { id: 'claimed', label: `Claimed (${claimedIds.length})` },
+              { id: 'claimed', label: `Claimed (${claimedKeys.size})` },
               { id: 'alerts', label: `Alerts (${unreadAlertsCount})` },
             ] as const
           ).map((tab) => (
@@ -923,7 +953,9 @@ export default function App() {
                   <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2.5">
                       <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-                      <span className="text-xs text-slate-300">Ends in</span>
+                      {headlinerCountdown.totalHours !== Infinity && (
+                        <span className="text-xs text-slate-300">Ends in</span>
+                      )}
                       <span className="text-sm sm:text-base font-mono font-bold tabular-nums text-white bg-slate-950/90 border border-slate-800 px-3 py-1 rounded-lg">
                         {headlinerCountdown.formatted}
                       </span>
@@ -995,7 +1027,7 @@ export default function App() {
                     {expiringGames.map((expGame) => {
                       const cd = formatCountdown(expGame.endDate, nowMs);
                       const storeMeta = STORE_META[expGame.store];
-                      const claimed = claimedIds.includes(expGame.id);
+                      const claimed = isGameClaimed(expGame.id);
 
                       return (
                         <div key={expGame.id} className="py-3.5 first:pt-1 last:pb-1 space-y-2">
@@ -1142,7 +1174,7 @@ export default function App() {
                   ${totalClaimedSavings.toFixed(2)} Saved
                 </div>
                 <div className="text-xs text-slate-400">
-                  {claimedIds.length} giveaways marked claimed
+                  {claimedKeys.size} giveaways marked claimed
                 </div>
               </div>
             </section>
@@ -1274,7 +1306,7 @@ export default function App() {
                     >
                       <option value="ending_soon">Ending Soonest</option>
                       <option value="highest_value">Highest Value ($)</option>
-                      <option value="rating">Highest User Rating</option>
+                      <option value="rating">Highest Metacritic Score</option>
                     </select>
                   </div>
                 </div>
@@ -1353,7 +1385,7 @@ export default function App() {
                   {filteredLiveGiveaways.map((game) => {
                     const countdown = formatCountdown(game.endDate, nowMs);
                     const storeMeta = STORE_META[game.store];
-                    const isClaimed = claimedIds.includes(game.id);
+                    const isClaimed = isGameClaimed(game.id);
 
                     return (
                       <article
@@ -1420,10 +1452,14 @@ export default function App() {
                                 platforms={game.platforms}
                                 className="inline-flex flex-wrap items-center gap-1.5 text-slate-300"
                               />
-                              <span aria-hidden="true">·</span>
-                              <span className="font-mono tabular-nums text-slate-300">
-                                {game.ratingScore}% Rating
-                              </span>
+                              {game.ratingScore !== undefined && (
+                                <>
+                                  <span aria-hidden="true">·</span>
+                                  <span className="font-mono tabular-nums text-slate-300">
+                                    Metacritic {game.ratingScore}
+                                  </span>
+                                </>
+                              )}
                             </div>
 
                             <div>
@@ -1754,7 +1790,7 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         currentUser={currentUser}
-        claimedCount={claimedIds.length}
+        claimedCount={claimedKeys.size}
         totalSavedUsd={totalClaimedSavings}
         isSyncingCloud={isSyncingCloud}
         onClose={() => setIsAuthModalOpen(false)}
@@ -1764,10 +1800,10 @@ export default function App() {
           try {
             await ensureUserProfileAndSyncGuestClaims(
               user,
-              claimedIds,
-              giveaways,
-              prefs.browserPushEnabled,
-              prefs.monitoredStores
+              claimedIdsRef.current,
+              giveawaysRef.current,
+              prefsRef.current.browserPushEnabled,
+              prefsRef.current.monitoredStores
             );
           } catch {
             // Handled in firebase helper

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   Download,
-  Share,
   ShieldCheck,
   Smartphone,
   X,
@@ -127,10 +126,10 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-display font-bold text-white">
-                Download LootRadar Mobile App
+                Get LootRadar on Your Phone
               </h2>
               <p className="text-xs text-slate-400">
-                Compiled native packages for Android &amp; iOS with Cloud Claim Sync
+                The home screen web app is always up to date
               </p>
             </div>
           </div>
@@ -158,7 +157,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4483.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4483.9993.9993 0 .5511-.4483.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.2439 13.8533 7.8508 12 7.8508s-3.5902.3931-5.1367 1.0989L4.841 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3435-4.1021-2.6892-7.5743-6.1185-9.4396" />
               </svg>
-              <span>Android (LootRadar.apk)</span>
+              <span>Android</span>
             </button>
 
             <button
@@ -181,20 +180,42 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
         <div className="p-6 space-y-5">
           {selectedOs === 'android' ? (
             <>
+              <div className="bg-slate-950/90 border border-cyan-500/40 rounded-xl p-5 space-y-3">
+                <div className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Recommended · Always Current</span>
+                </div>
+                <h3 className="text-base font-display font-bold text-white">
+                  Add LootRadar to Your Home Screen
+                </h3>
+                {deferredPrompt && !pwaInstalled ? (
+                  <button
+                    onClick={handleInstallPwa}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Install Web App</span>
+                  </button>
+                ) : (
+                  <p className="text-xs text-slate-300">
+                    {pwaInstalled
+                      ? 'LootRadar is installed.'
+                      : 'In Chrome, open the ⋮ menu and tap Add to Home screen.'}
+                  </p>
+                )}
+              </div>
+
               <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>
-                        Signed Android Package (v1 + v2 + v3 · Root DEX Aligned)
-                      </span>
+                    <div className="text-xs font-semibold text-amber-300">
+                      Older Build · October 27, 2026
                     </div>
                     <h3 className="text-base font-display font-bold text-white mt-1">
-                      LootRadar for Android (LootRadar.apk)
+                      Android APK
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5 font-mono tabular-nums">
-                      Package: com.lootradar.app · Target SDK 34 · Android 7.0 – 16+
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Doesn't include recent fixes or the hourly giveaway feed.
                     </p>
                   </div>
                 </div>
@@ -204,35 +225,23 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                     href="./LootRadar.apk"
                     download="LootRadar.apk"
                     onClick={handleVerifiedApkDownload}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition-colors"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-colors"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 text-cyan-400" />
                     <span>
-                      {isDownloadingApk
-                        ? 'Preparing Verified LootRadar.apk...'
-                        : 'Download Android APK (LootRadar.apk)'}
+                      {isDownloadingApk ? 'Preparing APK...' : 'Download Older APK'}
                     </span>
                   </a>
-
-                  {deferredPrompt && !pwaInstalled && (
-                    <button
-                      onClick={handleInstallPwa}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors cursor-pointer"
-                    >
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span>Instant Web App Install</span>
-                    </button>
-                  )}
                 </div>
               </div>
 
               <div className="space-y-2.5 text-xs text-slate-300">
                 <div className="font-semibold text-white">
-                  How to install LootRadar.apk on Android:
+                  If you choose the APK:
                 </div>
                 <ol className="space-y-2 list-decimal list-inside text-slate-300">
                   <li>
-                    Tap <strong>Download Android APK</strong> above to download{' '}
+                    Tap <strong>Download Older APK</strong> above to download{' '}
                     <span className="font-mono text-cyan-300">LootRadar.apk</span>.
                   </li>
                   <li>
@@ -249,18 +258,29 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
             </>
           ) : (
             <>
-              {/* iOS Option 1: Direct iPhone Profile Installer */}
+              <div className="bg-slate-950/90 border border-cyan-500/40 rounded-xl p-5 space-y-2">
+                <div className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Recommended · Always Current</span>
+                </div>
+                <h3 className="text-base font-display font-bold text-white">
+                  Add LootRadar to Your Home Screen
+                </h3>
+                <p className="text-xs text-slate-300">
+                  In Safari, tap <strong>Share</strong>, then{' '}
+                  <strong>Add to Home Screen</strong>, then <strong>Add</strong>.
+                </p>
+              </div>
+
               <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-5 space-y-4">
                 <div>
-                  <div className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Recommended · Direct iPhone Install (No Computer Needed)</span>
-                  </div>
-                  <h3 className="text-base font-display font-bold text-white mt-1">
-                    LootRadar iOS App Installer Profile (.mobileconfig)
+                  <h3 className="text-base font-display font-bold text-white">
+                    Other Install Options
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5 font-mono tabular-nums">
-                    Signed Apple WebClip Profile · Bundle: com.lootradar.ios · Full-Screen
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    The profile is an unsigned shortcut to this site, so iOS labels it
+                    Unverified. The IPA is an older unsigned build that must be signed
+                    by a sideloading tool.
                   </p>
                 </div>
 
@@ -268,10 +288,10 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                   <a
                     href="./LootRadar-iOS.mobileconfig"
                     download="LootRadar-iOS.mobileconfig"
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition-colors"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-colors"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Download iPhone Installer (LootRadar-iOS.mobileconfig)</span>
+                    <Download className="w-4 h-4 text-cyan-400" />
+                    <span>Download Unsigned Profile</span>
                   </a>
 
                   <a
@@ -280,20 +300,20 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-colors"
                   >
                     <Download className="w-4 h-4 text-cyan-400" />
-                    <span>Download .IPA (AltStore / Sideloadly)</span>
+                    <span>Download Older IPA</span>
                   </a>
                 </div>
               </div>
 
               {/* iOS Step-by-Step Guides */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="text-xs">
                 <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2">
                   <div className="font-semibold text-white">
-                    Method A: Direct Profile Install
+                    If you choose the profile:
                   </div>
                   <ol className="space-y-1.5 list-decimal list-inside text-slate-300">
                     <li>
-                      Tap <strong>Download iPhone Installer</strong> in Safari and
+                      Tap <strong>Download Unsigned Profile</strong> in Safari and
                       tap <strong>Allow</strong>.
                     </li>
                     <li>
@@ -306,24 +326,6 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                   </ol>
                 </div>
 
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2">
-                  <div className="font-semibold text-white flex items-center gap-1.5">
-                    <Share className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Method B: Safari Add to Home Screen</span>
-                  </div>
-                  <ol className="space-y-1.5 list-decimal list-inside text-slate-300">
-                    <li>
-                      Tap the <strong>Share</strong> icon in the bottom Safari bar.
-                    </li>
-                    <li>
-                      Scroll down and tap <strong>Add to Home Screen</strong>.
-                    </li>
-                    <li>
-                      Tap <strong>Add</strong> to launch LootRadar in full-screen
-                      standalone mode.
-                    </li>
-                  </ol>
-                </div>
               </div>
             </>
           )}

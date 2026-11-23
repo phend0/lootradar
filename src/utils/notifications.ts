@@ -1,3 +1,4 @@
+import { OPEN_ENDED_DATE } from './gameEligibility';
 import { RadarAlert } from '../types';
 
 export function getBrowserNotificationPermission(): NotificationPermission | 'unsupported' {
@@ -72,6 +73,15 @@ export function formatCountdown(targetIso: string, nowMs: number): {
   isExpired: boolean;
   totalHours: number;
 } {
+  if (targetIso === OPEN_ENDED_DATE) {
+    return {
+      formatted: 'No end date listed',
+      isUrgent: false,
+      isExpired: false,
+      totalHours: Infinity,
+    };
+  }
+
   const targetMs = new Date(targetIso).getTime();
   const diff = Math.max(0, targetMs - nowMs);
 
