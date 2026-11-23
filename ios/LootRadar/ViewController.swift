@@ -4,7 +4,7 @@ import SafariServices
 
 class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
     private var webView: WKWebView!
-    private let remoteAppUrl = URL(string: "https://ais-pre-4elawtmchdh5dqp5c6ul7s-491717491862.us-west2.run.app")!
+    private let remoteAppUrl = URL(string: "https://phend0.github.io/lootradar/")!
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -63,7 +63,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
 
         if url.scheme == "http" || url.scheme == "https" {
             let host = (url.host ?? "").lowercased()
-            let isInternalHost = host.contains("run.app") || host.contains("localhost") || host.contains("127.0.0.1")
+            let isInternalHost = host == "phend0.github.io" || host.contains("localhost") || host.contains("127.0.0.1")
             if !isInternalHost && navigationAction.navigationType == .linkActivated {
                 let safariVC = SFSafariViewController(url: url)
                 safariVC.preferredBarTintColor = UIColor(red: 11/255, green: 15/255, blue: 25/255, alpha: 1.0)

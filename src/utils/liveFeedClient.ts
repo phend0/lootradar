@@ -5,6 +5,7 @@ import {
   isEligibleGamerPowerOffer,
   isEligibleGiveawayGame,
   parseRetailWorth,
+  withCurrentStatus,
 } from './gameEligibility';
 
 interface EpicOffer {
@@ -33,19 +34,63 @@ async function fetchJsonWithAndroidFallback(url: string): Promise<any> {
   }
 
   try {
-    const res = await fetch(url);
+    const res = await fetchWithTimeout(url);
     if (res.ok) return await res.json();
   } catch {
     // Fall through to CORS proxy for static hosting (e.g., GitHub Pages)
   }
 
+  // The public proxy fails intermittently, so give it a second attempt.
   const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const proxyRes = await fetch(proxyUrl);
-  if (!proxyRes.ok) throw new Error(`HTTP ${proxyRes.status}`);
-  return proxyRes.json();
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const proxyRes = await fetchWithTimeout(proxyUrl);
+      if (proxyRes.ok) return await proxyRes.json();
+      lastError = new Error(`HTTP ${proxyRes.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+async function fetchWithTimeout(url: string, timeoutMs = 10000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { cache: 'no-store', signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Absolute so the bundled Android and iOS apps read the same file as the website.
+const PUBLISHED_FEED_URL = 'https://phend0.github.io/lootradar/giveaways.json';
+const PUBLISHED_FEED_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+async function fetchPublishedFeed(): Promise<GiveawayGame[]> {
+  try {
+    const res = await fetchWithTimeout(`${PUBLISHED_FEED_URL}?t=${Date.now()}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    const age = Date.now() - new Date(data?.syncedAt).getTime();
+    if (!Array.isArray(data?.giveaways) || !(age < PUBLISHED_FEED_MAX_AGE_MS)) {
+      return [];
+    }
+    return withCurrentStatus(
+      data.giveaways.filter(isEligibleGiveawayGame),
+      Date.now()
+    );
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
+  const published = await fetchPublishedFeed();
+  if (published.length > 0) return published;
+
   const now = Date.now();
   const epicGames: GiveawayGame[] = [];
   const gpGames: GiveawayGame[] = [];
@@ -87,11 +132,11 @@ export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
       const originalPriceCents = Number(
         item?.price?.totalPrice?.originalPrice ?? 0
       );
-      const rawPriceStr =
-        item?.price?.totalPrice?.fmtPrice?.originalPrice || '$19.99';
+      const rawPriceStr = item?.price?.totalPrice?.fmtPrice?.originalPrice;
+      // A zero price means free-to-play, which is not a giveaway.
       const parsedPrice =
         parseRetailWorth(rawPriceStr) ||
-        (originalPriceCents > 0 ? originalPriceCents / 100 : 19.99);
+        (originalPriceCents > 0 ? originalPriceCents / 100 : 0);
 
       const activeFree = activeOffers.find(
         (o) =>
@@ -236,8 +281,7 @@ export async function fetchClientSideLiveGiveaways(): Promise<GiveawayGame[]> {
             titleLower.includes('prime gaming') ||
             titleLower.includes('amazon')
           );
-        })
-        .slice(0, 14);
+        });
 
       for (const item of candidates) {
         const platStr = String(item.platforms || '').toLowerCase();

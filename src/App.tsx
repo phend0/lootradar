@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BellRing,
   Check,
@@ -63,7 +63,10 @@ import {
   sanitizeDocId,
 } from './firebase';
 import { fetchClientSideLiveGiveaways } from './utils/liveFeedClient';
-import { isEligibleGiveawayGame } from './utils/gameEligibility';
+import { isEligibleGiveawayGame, withCurrentStatus } from './utils/gameEligibility';
+
+const FEED_POLL_INTERVAL_MS = 15 * 60 * 1000;
+const FEED_RESUME_MIN_AGE_MS = 5 * 60 * 1000;
 
 const STORAGE_KEYS = {
   CLAIMED: 'lootradar_claimed_ids_v4',
@@ -123,7 +126,16 @@ const ALL_PLATFORMS: PlatformId[] = ['windows', 'mac', 'linux', 'steamdeck', 'co
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('radar');
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
-  const [giveaways, setGiveaways] = useState<GiveawayGame[]>(INITIAL_GIVEAWAYS);
+  const [feedGiveaways, setGiveaways] = useState<GiveawayGame[]>(INITIAL_GIVEAWAYS);
+  // Re-evaluated each minute so games unlock and expire without a refetch.
+  const nowMinute = Math.floor(nowMs / 60000);
+  const giveaways = useMemo(
+    () => withCurrentStatus(feedGiveaways, nowMinute * 60000),
+    [feedGiveaways, nowMinute]
+  );
+  const giveawaysRef = useRef(giveaways);
+  giveawaysRef.current = giveaways;
+  const lastFeedAttemptRef = useRef(0);
   const [isSyncingFeed, setIsSyncingFeed] = useState<boolean>(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string>(() =>
     new Date().toISOString()
@@ -196,10 +208,12 @@ export default function App() {
 
   // Sync live giveaways from backend API (/api/giveaways) or native Android APK bridge
   const syncLiveGiveaways = async (forceRefresh = false) => {
+    lastFeedAttemptRef.current = Date.now();
     setIsSyncingFeed(true);
     try {
       const res = await fetch(
-        `/api/giveaways${forceRefresh ? '?refresh=true' : ''}`
+        `/api/giveaways${forceRefresh ? '?refresh=true' : ''}`,
+        { cache: 'no-store' }
       );
       if (res.ok) {
         const data = await res.json();
@@ -225,8 +239,28 @@ export default function App() {
     }
   };
 
+  // Sync on load, on a timer, and whenever the app returns to the foreground
   useEffect(() => {
     syncLiveGiveaways(false);
+
+    const syncIfStale = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        Date.now() - lastFeedAttemptRef.current >= FEED_RESUME_MIN_AGE_MS
+      ) {
+        syncLiveGiveaways(false);
+      }
+    };
+    const interval = setInterval(syncIfStale, FEED_POLL_INTERVAL_MS);
+    document.addEventListener('visibilitychange', syncIfStale);
+    window.addEventListener('focus', syncIfStale);
+    window.addEventListener('online', syncIfStale);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', syncIfStale);
+      window.removeEventListener('focus', syncIfStale);
+      window.removeEventListener('online', syncIfStale);
+    };
   }, []);
 
   // Listen to Firebase Auth state and sync user profile + guest claims
@@ -240,7 +274,7 @@ export default function App() {
           await ensureUserProfileAndSyncGuestClaims(
             user,
             claimedIds,
-            giveaways,
+            giveawaysRef.current,
             prefs.browserPushEnabled,
             prefs.monitoredStores
           );
@@ -281,7 +315,7 @@ export default function App() {
         // Ensure all cloud-claimed games are reflected in claimedIds
         setClaimedIds((prev) => {
           const merged = new Set(prev);
-          for (const g of giveaways) {
+          for (const g of giveawaysRef.current) {
             const sId = sanitizeDocId(g.id);
             if (cloudGameIds.has(sId) || cloudGameIds.has(g.id)) {
               merged.add(g.id);
@@ -325,7 +359,7 @@ export default function App() {
       unsubscribeClaims();
       unsubscribeProfile();
     };
-  }, [isAuthReady, currentUser, giveaways]);
+  }, [isAuthReady, currentUser]);
 
   // 1-second live countdown ticker
   useEffect(() => {
@@ -384,6 +418,7 @@ export default function App() {
   const handleSimulateAlert = (
     type: 'new_drop' | 'expiring_soon' | 'upcoming_unlock'
   ) => {
+    if (giveaways.length === 0) return;
     if (type === 'upcoming_unlock') {
       const target =
         giveaways.find((g) => g.status === 'upcoming') || giveaways[0];

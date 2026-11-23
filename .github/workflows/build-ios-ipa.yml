@@ -1,8 +1,7 @@
-name: Build iOS IPA & Android APK
+name: Build iOS IPA
 
+# Manual only: macOS runners are expensive, and game data updates without a rebuild.
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:

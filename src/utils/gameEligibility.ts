@@ -65,6 +65,25 @@ export function isEligibleGamerPowerOffer(item: {
   return false;
 }
 
+/** Drops ended giveaways and recomputes status, since feeds only set it at fetch time. */
+export function withCurrentStatus(
+  games: GiveawayGame[],
+  nowMs: number
+): GiveawayGame[] {
+  return games
+    .filter((game) => new Date(game.endDate).getTime() > nowMs)
+    .map((game) => {
+      const hoursLeft = (new Date(game.endDate).getTime() - nowMs) / 3600000;
+      const status: GiveawayGame['status'] =
+        new Date(game.startDate).getTime() > nowMs
+          ? 'upcoming'
+          : hoursLeft <= 48
+          ? 'expiring'
+          : 'active';
+      return status === game.status ? game : { ...game, status };
+    });
+}
+
 export function isEligibleGiveawayGame(game: GiveawayGame): boolean {
   if (!game || !game.title) return false;
   if (

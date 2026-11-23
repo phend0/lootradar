@@ -16,6 +16,7 @@ import {
   doc,
   getDoc,
   getDocFromServer,
+  getDocs,
   setDoc,
   deleteDoc,
   collection,
@@ -156,9 +157,18 @@ export async function ensureUserProfileAndSyncGuestClaims(
     .slice(0, 10);
 
   let profileExists = false;
+  const existingClaimIds = new Set<string>();
   try {
     const snap = await getDoc(userRef);
     profileExists = snap.exists();
+    if (profileExists) {
+      // Rewriting an existing claim changes createdAt, which the rules reject
+      // and which would fail this entire batch.
+      const claims = await getDocs(
+        query(collection(db, 'users', uid, 'claims'), where('uid', '==', uid))
+      );
+      claims.forEach((claim) => existingClaimIds.add(claim.id));
+    }
   } catch (error) {
     handleFirestoreError(error, OperationType.GET, userPath);
   }
@@ -186,7 +196,10 @@ export async function ensureUserProfileAndSyncGuestClaims(
     }
 
     // Merge any guest claimed games into Firestore atomically
-    for (const rawGameId of localClaimedIds.slice(0, 50)) {
+    const unsyncedClaimIds = localClaimedIds.filter(
+      (id) => !existingClaimIds.has(sanitizeDocId(id))
+    );
+    for (const rawGameId of unsyncedClaimIds.slice(0, 50)) {
       const gameId = sanitizeDocId(rawGameId);
       const foundGame = allGiveaways.find(
         (g) => sanitizeDocId(g.id) === gameId || g.id === rawGameId
